@@ -959,7 +959,13 @@ class TestBasisObsBehaviour(unittest.TestCase):
                 # dt_float,
                 # dt_float,
                 # timestep_protection_engaged
-                dt_int
+                dt_int,
+                # voltage angles (>= 1.12.6)
+                dt_float,
+                dt_float,
+                dt_float,
+                dt_float,
+                dt_float,
             ],
             dtype=object,
         )
@@ -1039,10 +1045,16 @@ class TestBasisObsBehaviour(unittest.TestCase):
                 # 5,
                 # 0,
                 # timestep_protection_engaged
-                20
+                20,
+                # voltage angles (>= 1.12.6)
+                20,
+                20,
+                11,
+                5,
+                0,
             ]
         )
-        self.size_obs = 429 + 4 + 4 + 2 + 1 + 10 + 5 + 0 + 5 + 20
+        self.size_obs = 429 + 4 + 4 + 2 + 1 + 10 + 5 + 0 + 5 + 20 + 56
 
     def tearDown(self):
         self.env.close()
@@ -2132,6 +2144,26 @@ class TestBasisObsBehaviour(unittest.TestCase):
             assert el in obs.attr_list_json, f"{el} should be equal in obs and obs2"
         vect2 = obs2.to_vect()
         assert np.all(vect == vect2)
+
+    def test_theta_attributes_in_vector(self):
+        obs = self.env.reset()
+        theta_attrs = (
+            "theta_or",
+            "theta_ex",
+            "load_theta",
+            "gen_theta",
+            "storage_theta",
+        )
+
+        for attr_nm in theta_attrs:
+            assert attr_nm in type(obs).attr_list_vect
+            assert attr_nm not in type(obs).attr_list_json
+
+        obs_from_vect = self.env.observation_space.from_vect(obs.to_vect())
+        for attr_nm in theta_attrs:
+            np.testing.assert_array_equal(
+                getattr(obs_from_vect, attr_nm), getattr(obs, attr_nm)
+            )
 
     def test_5_simulate_proper_timestep(self):
         self.skipTest(

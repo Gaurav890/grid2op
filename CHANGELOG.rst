@@ -3,6 +3,7 @@ Work "in progress"
 
 General grid2op improvments:
 
+- add voltage angle attributes to the complete observation vector (issue #711)
 - ill formed docstring in the BaseAction module
 - remove pandapower dependency (have a way to install grid2op without pandapower)
 - better logging
