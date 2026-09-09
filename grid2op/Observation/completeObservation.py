@@ -147,7 +147,11 @@ class CompleteObservation(BaseObservation):
 
             These attributes are set to zero when the backend does not support voltage
             angles; see :attr:`BaseObservation.support_theta`.
-            
+
+            Voltage angles use the reference selected by the backend. A uniform shift
+            of every angle represents the same grid state, so users can subtract a
+            common reference or statistic when reference-invariant inputs are needed.
+
     """
 
     attr_list_vect = [

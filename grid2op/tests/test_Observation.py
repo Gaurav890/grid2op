@@ -2146,24 +2146,47 @@ class TestBasisObsBehaviour(unittest.TestCase):
         assert np.all(vect == vect2)
 
     def test_theta_attributes_in_vector(self):
-        obs = self.env.reset()
-        theta_attrs = (
-            "theta_or",
-            "theta_ex",
-            "load_theta",
-            "gen_theta",
-            "storage_theta",
-        )
-
-        for attr_nm in theta_attrs:
-            assert attr_nm in type(obs).attr_list_vect
-            assert attr_nm not in type(obs).attr_list_json
-
-        obs_from_vect = self.env.observation_space.from_vect(obs.to_vect())
-        for attr_nm in theta_attrs:
-            np.testing.assert_array_equal(
-                getattr(obs_from_vect, attr_nm), getattr(obs, attr_nm)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
+            env = grid2op.make(
+                "educ_case14_storage",
+                test=True,
+                _add_to_name=type(self).__name__,
             )
+
+        with env:
+            obs = env.reset()
+            theta_attrs = (
+                "theta_or",
+                "theta_ex",
+                "load_theta",
+                "gen_theta",
+                "storage_theta",
+            )
+            expected_by_attr = {}
+
+            for attr_id, attr_nm in enumerate(theta_attrs):
+                assert attr_nm in type(obs).attr_list_vect
+                assert attr_nm not in type(obs).attr_list_json
+                values = (
+                    np.arange(getattr(obs, attr_nm).size, dtype=dt_float)
+                    + 100.0 * (attr_id + 1)
+                )
+                getattr(obs, attr_nm)[:] = values
+                expected_by_attr[attr_nm] = values
+
+            obs._vectorized = None
+            obs_vect = obs.to_vect()
+            obs_from_vect = env.observation_space.from_vect(obs_vect)
+
+            for attr_nm, expected in expected_by_attr.items():
+                np.testing.assert_array_equal(
+                    env.observation_space.extract_from_vect(obs_vect, attr_nm),
+                    expected,
+                )
+                np.testing.assert_array_equal(
+                    getattr(obs_from_vect, attr_nm), expected
+                )
 
     def test_5_simulate_proper_timestep(self):
         self.skipTest(

@@ -3,7 +3,6 @@ Work "in progress"
 
 General grid2op improvments:
 
-- add voltage angle attributes to the complete observation vector (issue #711)
 - ill formed docstring in the BaseAction module
 - remove pandapower dependency (have a way to install grid2op without pandapower)
 - better logging
@@ -76,6 +75,7 @@ The "simulate" function :
 
 Better handling of the voltages:
 
+- add voltage angle attributes to the complete observation vector (issue #711)
 - model better the voltage, include voltage constraints
 - shunts in observation too, for real (but what to do when backend is not shunt compliant to prevent the
   stuff to break)
